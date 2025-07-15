@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Layers, BarChart3 } from 'lucide-react';
+import { MapPin, Layers, BarChart3, Settings, Plus, Activity } from 'lucide-react';
 import { SearchBar } from './components/SearchBar';
 import { VehicleCard } from './components/VehicleCard';
 import { Map } from './components/Map';
 import { VehicleDetails } from './components/VehicleDetails';
 import { Dashboard } from './components/Dashboard';
+import { VehicleRegistration } from './components/VehicleRegistration';
+import { RealTimeMonitor } from './components/RealTimeMonitor';
+import { DeviceManagement } from './components/DeviceManagement';
 import { Vehicle } from './types/Vehicle';
 import { mockVehicles } from './data/mockVehicles';
 
-type ViewMode = 'dashboard' | 'map' | 'list';
+type ViewMode = 'dashboard' | 'map' | 'list' | 'register' | 'monitor' | 'devices';
 
 function App() {
   const [vehicles, setVehicles] = useState<Vehicle[]>(mockVehicles);
@@ -17,6 +20,9 @@ function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [organizationId] = useState('demo-org-123'); // In real app, get from auth
+  const [gpsProvider] = useState('verizon'); // In real app, get from settings
+  const [apiKey] = useState('demo-api-key'); // In real app, get from secure storage
 
   // Simulate real-time updates
   useEffect(() => {
@@ -159,6 +165,39 @@ function App() {
                   <Layers size={18} />
                   <span>List</span>
                 </button>
+                <button
+                  onClick={() => setViewMode('monitor')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                    viewMode === 'monitor'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Activity size={18} />
+                  <span>Live Monitor</span>
+                </button>
+                <button
+                  onClick={() => setViewMode('register')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                    viewMode === 'register'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Plus size={18} />
+                  <span>Register</span>
+                </button>
+                <button
+                  onClick={() => setViewMode('devices')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                    viewMode === 'devices'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Settings size={18} />
+                  <span>Devices</span>
+                </button>
               </nav>
             </div>
           </div>
@@ -167,20 +206,22 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Bar */}
-        <div className="mb-8">
-          <SearchBar onSearch={handleSearch} isLoading={isLoading} />
-          {searchQuery && (
-            <div className="flex items-center justify-center mt-4">
-              <button
-                onClick={clearSearch}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-              >
-                Clear search results ({filteredVehicles.length} found)
-              </button>
-            </div>
-          )}
-        </div>
+        {/* Search Bar - only show for certain views */}
+        {['dashboard', 'map', 'list'].includes(viewMode) && (
+          <div className="mb-8">
+            <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+            {searchQuery && (
+              <div className="flex items-center justify-center mt-4">
+                <button
+                  onClick={clearSearch}
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Clear search results ({filteredVehicles.length} found)
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Content based on view mode */}
         {viewMode === 'dashboard' && (
@@ -236,6 +277,28 @@ function App() {
               ))}
             </div>
           </div>
+        )}
+
+        {viewMode === 'monitor' && (
+          <RealTimeMonitor
+            organizationId={organizationId}
+            selectedProvider={gpsProvider}
+            apiKey={apiKey}
+          />
+        )}
+
+        {viewMode === 'register' && (
+          <VehicleRegistration
+            organizationId={organizationId}
+            onRegistrationComplete={() => {
+              // Refresh vehicle list or show success message
+              setViewMode('dashboard');
+            }}
+          />
+        )}
+
+        {viewMode === 'devices' && (
+          <DeviceManagement organizationId={organizationId} />
         )}
 
         {filteredVehicles.length === 0 && searchQuery && (
