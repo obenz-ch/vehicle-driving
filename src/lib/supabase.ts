@@ -105,6 +105,27 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['alerts']['Row'], 'id' | 'created_at'>;
         Update: Partial<Database['public']['Tables']['alerts']['Insert']>;
       };
+      gps_devices: {
+        Row: {
+          id: string;
+          device_id: string;
+          imei: string;
+          device_type: string;
+          manufacturer?: string;
+          model?: string;
+          sim_card_number?: string;
+          data_plan_provider?: string;
+          status: string;
+          installation_date?: string;
+          battery_level?: number;
+          signal_strength?: number;
+          last_heartbeat?: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['gps_devices']['Row'], 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Database['public']['Tables']['gps_devices']['Insert']>;
+      };
     };
   };
 }

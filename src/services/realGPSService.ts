@@ -40,8 +40,17 @@ export class RealGPSService {
     this.config = getProviderConfig(provider);
   }
 
+  private isDemoMode(): boolean {
+    return this.apiKey === 'demo-key' || this.apiKey === 'demo-api-key' || !this.apiKey;
+  }
+
   // Initialize real-time connection
   async initializeRealTimeConnection(organizationId: string): Promise<void> {
+    if (this.isDemoMode()) {
+      console.log('Demo mode: Real-time GPS connection disabled');
+      return;
+    }
+
     try {
       // Set up WebSocket connection for real-time updates
       const wsUrl = `${this.config.baseUrl.replace('https', 'wss')}/realtime`;
@@ -167,6 +176,11 @@ export class RealGPSService {
     deviceType: string;
     simCardNumber?: string;
   }): Promise<any> {
+    if (this.isDemoMode()) {
+      console.log('Demo mode: Device registration disabled');
+      return { success: true, message: 'Demo mode - device registration simulated' };
+    }
+
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.devices}`, {
         method: 'POST',
@@ -231,6 +245,11 @@ export class RealGPSService {
 
   // Send remote commands to device
   async sendDeviceCommand(deviceId: string, command: string, params?: any): Promise<any> {
+    if (this.isDemoMode()) {
+      console.log('Demo mode: Device command disabled');
+      return { success: true, message: 'Demo mode - command simulated' };
+    }
+
     try {
       const response = await fetch(`${this.config.baseUrl}${this.config.endpoints.devices}/${deviceId}/commands`, {
         method: 'POST',
